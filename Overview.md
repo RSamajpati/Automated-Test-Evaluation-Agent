@@ -1,106 +1,67 @@
-Data Ingestion Module – Detailed Explanation
-The Data Ingestion Module is responsible for collecting, preprocessing, and structuring student answer sheets and model solutions before evaluation. It must handle various input formats (text, PDFs, images, handwritten answers) and convert them into machine-readable text.
+# **Data Ingestion Module – Detailed Explanation**  
 
-1. Core Responsibilities of the Data Ingestion Module
-Accepting Inputs
+The **Data Ingestion Module** is responsible for collecting, preprocessing, and structuring student answer sheets and model solutions before evaluation. It must handle various input formats (text, PDFs, images, handwritten answers) and convert them into machine-readable text.
 
-Model Solutions (various correct answers provided by instructors).
-Student Answer Sheets (handwritten or typed).
-Metadata (Student ID, Exam ID, Question ID, etc.).
-Preprocessing Data
+---
 
-Extracting text from different formats (OCR for images/PDFs, direct text parsing).
-Cleaning the extracted text (removing noise, correcting spelling).
-Normalizing the text (tokenization, lemmatization, stemming).
-Storing Preprocessed Data
+## **1. Core Responsibilities of the Data Ingestion Module**
+1. **Accept Multiple Input Formats**  
+   - Text-based answers (plain text, Word files, PDFs)  
+   - Handwritten answers (scanned PDFs, images)  
+   - Model solutions in structured form (database, JSON, CSV)  
 
-Organizing extracted text for NLP evaluation.
-Storing it in a structured database.
-2. Types of Inputs Handled
-(a) Text-Based Inputs (Direct Entry / Digital Documents)
-JSON / CSV files containing model answers and student responses.
-Student answers entered via an online test portal.
-PDFs containing digital text (not scanned images).
-(b) Scanned Answer Sheets & Images (Handwritten Answers)
-Scanned answer sheets (PDFs, JPEGs, PNGs).
-Handwritten responses from students.
-Images uploaded through an online portal.
-(c) Instructor-Provided Model Solutions
-Multiple correct answers (short answers, paragraph-based, bullet points).
-Reference answers formatted in LaTeX (for math-heavy subjects).
+2. **Preprocessing the Data**  
+   - Converting all text formats into structured text  
+   - Optical Character Recognition (OCR) for images & scanned documents  
+   - Removing noise (headers, footers, extra whitespace)  
+   - Handling multiple languages if required  
 
-3. Data Extraction Pipeline
-Since student answer sheets come in various formats, the Data Extraction Pipeline should be able to handle all of them efficiently.
+3. **Structuring the Data**  
+   - Extracting student responses and mapping them to questions  
+   - Associating answers with metadata (student ID, question number)  
+   - Storing structured data for evaluation  
 
-Step 1: Accepting Model Solutions & Student Answers
-API Endpoint to receive input data:
-python
-Copy
-Edit
-from fastapi import FastAPI, File, UploadFile
-import shutil
+---
 
-app = FastAPI()
+## **2. Tech Stack for Data Ingestion**
+| Component | Technology |
+|-----------|------------|
+| **OCR (for handwritten answers)** | `Tesseract OCR`, `EasyOCR`, `AWS Textract` |
+| **Text Processing** | `NLTK`, `spaCy`, `LangChain`, `OpenAI API` (for semantic understanding) |
+| **File Handling** | `PyMuPDF` (PDFs), `pdfminer.six`, `docx` (Word files) |
+| **Data Storage** | `MongoDB` (NoSQL for flexibility), `PostgreSQL` (structured DB) |
 
-@app.post("/upload/")
-async def upload_file(file: UploadFile = File(...)):
-    with open(f"uploads/{file.filename}", "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    return {"filename": file.filename}
-Step 2: Extracting Text from Various Formats
-(a) Extracting from PDFs (Digital & Scanned)
-Digital PDFs (Use pdfplumber to extract text directly).
+---
 
-python
-Copy
-Edit
+## **3. Workflow of Data Ingestion**
+### **Step 1: Data Collection**
+- Upload answers via an interface (web app, cloud storage, API)  
+- Extract text from PDFs/Word files  
+- Use OCR to process handwritten answers  
+
+### **Step 2: Preprocessing & Cleaning**
+- Convert text into standard format (lowercasing, removing special chars)  
+- Use NLP techniques for sentence tokenization  
+- Handle spelling corrections using `SymSpell` or `Hunspell`  
+
+### **Step 3: Structuring & Storage**
+- Map answers to corresponding questions  
+- Store structured responses in a database  
+- Prepare data for the **Evaluation Module**  
+
+---
+
+## **4. Example Implementation**
+### **Extracting Text from PDFs**
+```python
 import pdfplumber
 
 def extract_text_from_pdf(pdf_path):
+    text = ""
     with pdfplumber.open(pdf_path) as pdf:
-        text = "\n".join([page.extract_text() for page in pdf.pages if page.extract_text()])
+        for page in pdf.pages:
+            text += page.extract_text() + "\n"
     return text
-Scanned PDFs / Images (Use OCR with Tesseract/EasyOCR).
 
-python
-Copy
-Edit
-import pytesseract
-from PIL import Image
-
-def extract_text_from_image(image_path):
-    text = pytesseract.image_to_string(Image.open(image_path))
-    return text
-(b) Extracting from Handwritten Responses
-Use EasyOCR / PaddleOCR for better recognition of handwritten answers.
-python
-Copy
-Edit
-import easyocr
-
-reader = easyocr.Reader(['en'])
-text = reader.readtext('handwritten_answer.jpg', detail=0)
-print(text)
-(c) Extracting from JSON/CSV Files
-Model solutions can be provided in JSON format:
-
-json
-Copy
-Edit
-{
-    "question_id": "Q1",
-    "correct_answers": ["The mitochondria is the powerhouse of the cell.", "Mitochondria generates ATP."]
-}
-Python function to load JSON:
-
-python
-Copy
-Edit
-import json
-
-def load_model_solutions(json_file):
-    with open(json_file, 'r') as file:
-        data = json.load(file)
-    return data
-
-
+pdf_text = extract_text_from_pdf("student_answers.pdf")
+print(pdf_text)
