@@ -83,5 +83,54 @@ print(text)
 -Multi-language support	Use LangChain, spaCy, and Google Translate API for language processing
 -Noisy Text	Apply regex and NLP preprocessing to clean data
 
-##6. Next Steps
--After data ingestion, the next module is Evaluation, where student answers will be compared against model solutions using NLP techniques like semantic similarity and keyword extraction.
+# **Step 6: Evaluation Module – Detailed Breakdown**
+
+The **Evaluation Module** is responsible for comparing student answers with model solutions using AI, NLP, and LLM-based techniques. It assigns marks, generates feedback, and ensures fair grading.
+
+---
+
+## **1. Core Responsibilities of the Evaluation Module**
+1. **Compare Student Answers with Model Solutions**  
+   - Use **text similarity** techniques (Cosine Similarity, Jaccard Similarity, TF-IDF).  
+   - Use **LLMs (GPT-4, BERT, T5)** for conceptual understanding.  
+   - Identify **key missing points** in student responses.  
+
+2. **Score Calculation**  
+   - **Exact Match**: Full marks for identical answers.  
+   - **Partial Match**: Assign scores based on similarity.  
+   - **Keyword Matching**: Ensure essential concepts are included.  
+   - **Grammar and Language Quality**: Bonus/malus points for clarity.  
+
+3. **Provide Feedback**  
+   - Highlight missing points.  
+   - Suggest improvements for future answers.  
+   - Provide explanations for deducted marks.  
+
+4. **Store Results in the Database**  
+   - Store scores, feedback, and graded answers in a structured format.  
+   - Update student marks in the portal automatically.  
+
+---
+
+## **2. NLP & AI Techniques Used**
+| Technique | Purpose |
+|-----------|---------|
+| **TF-IDF + Cosine Similarity** | Find text similarity (good for factual answers) |
+| **BERT Embeddings (Sentence Transformers)** | Compare semantic meaning |
+| **OpenAI GPT / Llama 2 / Claude** | Generate explanations & feedback |
+| **Spacy + NLTK (Keyword Extraction)** | Ensure key concepts are covered |
+| **Grammarly API / LanguageTool** | Check grammar & writing quality |
+
+---
+
+## **3. Step-by-Step Workflow**
+### **Step 1: Fetch Preprocessed Answers from the Database**
+```python
+import psycopg2
+
+def fetch_answers(student_id, exam_id):
+    conn = psycopg2.connect("dbname=test user=admin password=secret")
+    cursor = conn.cursor()
+    cursor.execute("SELECT question_id, cleaned_text FROM answers WHERE student_id = %s AND exam_id = %s", (student_id, exam_id))
+    return cursor.fetchall()
+
