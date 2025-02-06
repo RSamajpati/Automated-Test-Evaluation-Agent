@@ -28,3 +28,79 @@ Images uploaded through an online portal.
 (c) Instructor-Provided Model Solutions
 Multiple correct answers (short answers, paragraph-based, bullet points).
 Reference answers formatted in LaTeX (for math-heavy subjects).
+
+3. Data Extraction Pipeline
+Since student answer sheets come in various formats, the Data Extraction Pipeline should be able to handle all of them efficiently.
+
+Step 1: Accepting Model Solutions & Student Answers
+API Endpoint to receive input data:
+python
+Copy
+Edit
+from fastapi import FastAPI, File, UploadFile
+import shutil
+
+app = FastAPI()
+
+@app.post("/upload/")
+async def upload_file(file: UploadFile = File(...)):
+    with open(f"uploads/{file.filename}", "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    return {"filename": file.filename}
+Step 2: Extracting Text from Various Formats
+(a) Extracting from PDFs (Digital & Scanned)
+Digital PDFs (Use pdfplumber to extract text directly).
+
+python
+Copy
+Edit
+import pdfplumber
+
+def extract_text_from_pdf(pdf_path):
+    with pdfplumber.open(pdf_path) as pdf:
+        text = "\n".join([page.extract_text() for page in pdf.pages if page.extract_text()])
+    return text
+Scanned PDFs / Images (Use OCR with Tesseract/EasyOCR).
+
+python
+Copy
+Edit
+import pytesseract
+from PIL import Image
+
+def extract_text_from_image(image_path):
+    text = pytesseract.image_to_string(Image.open(image_path))
+    return text
+(b) Extracting from Handwritten Responses
+Use EasyOCR / PaddleOCR for better recognition of handwritten answers.
+python
+Copy
+Edit
+import easyocr
+
+reader = easyocr.Reader(['en'])
+text = reader.readtext('handwritten_answer.jpg', detail=0)
+print(text)
+(c) Extracting from JSON/CSV Files
+Model solutions can be provided in JSON format:
+
+json
+Copy
+Edit
+{
+    "question_id": "Q1",
+    "correct_answers": ["The mitochondria is the powerhouse of the cell.", "Mitochondria generates ATP."]
+}
+Python function to load JSON:
+
+python
+Copy
+Edit
+import json
+
+def load_model_solutions(json_file):
+    with open(json_file, 'r') as file:
+        data = json.load(file)
+    return data
+
+
