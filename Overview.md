@@ -77,10 +77,11 @@ print(text)
 ```
 
 ##5. Challenges & Solutions
-###Challenge	Solution
-Handwritten text accuracy	Fine-tune OCR models, use AI-based handwriting recognition (AWS Textract, Google Vision AI)
-Different file formats	Use libraries like pdfplumber, docx, and PyMuPDF for text extraction
-Multi-language support	Use LangChain, spaCy, and Google Translate API for language processing
-Noisy Text	Apply regex and NLP preprocessing to clean data
-6. Next Steps
-After data ingestion, the next module is Evaluation, where student answers will be compared against model solutions using NLP techniques like semantic similarity and keyword extraction.
+###Challenge Solution
+-Handwritten text accuracy	Fine-tune OCR models, use AI-based handwriting recognition (AWS Textract, Google Vision AI)
+-Different file formats	Use libraries like pdfplumber, docx, and PyMuPDF for text extraction
+-Multi-language support	Use LangChain, spaCy, and Google Translate API for language processing
+-Noisy Text	Apply regex and NLP preprocessing to clean data
+
+##6. Next Steps
+-After data ingestion, the next module is Evaluation, where student answers will be compared against model solutions using NLP techniques like semantic similarity and keyword extraction.
